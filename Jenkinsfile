@@ -1,8 +1,7 @@
 pipeline {
     agent any
     environment {
-        // Sustituye 'tu_usuario' por tu nombre real de Docker Hub
-        DOCKER_USER = 'tu_usuario'
+        DOCKER_USER = 'acmeneses496'
         IMAGE_NAME = 'fastapi-app'
         REPO_NAME = "${DOCKER_USER}/${IMAGE_NAME}"
     }
