@@ -34,7 +34,7 @@ pipeline {
                             -v proyecto-uni-sabana_jenkins_home:/var/jenkins_home \
                             sonarsource/sonar-scanner-cli \
                             -Dsonar.projectKey=fastapi-app-andres \
-                            -Dsonar.sources=${WORKSPACE} \
+                            -Dsonar.sources=. -Dsonar.projectBaseDir=${WORKSPACE} \
                             -Dsonar.login=${SONAR_TOKEN}
                         """
                     }
