@@ -32,7 +32,7 @@ pipeline {
                                  usernameVariable: 'USER', 
                                  passwordVariable: 'PASS')]) {
                     
-                    sh "echo \$PASS | docker login -u \$USER --password-stdin"
+                    sh "docker login -u ${USER} -p ${PASS}"
                     sh "docker push ${FULL_IMAGE_NAME}"
                 }
             }
