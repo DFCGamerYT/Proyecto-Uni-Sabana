@@ -11,6 +11,7 @@ pipeline {
         IMAGE_TAG = 'latest'
         FULL_IMAGE_NAME = "${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
         SONAR_SERVER = 'sonarqube-server'
+        DOCKER_NETWORK = 'proyecto-uni-sabana_devops-network'
     }
 
     stages {
@@ -22,22 +23,21 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                // Cambiamos 'string' por 'usernamePassword'
                 withCredentials([usernamePassword(credentialsId: 'sonarqube-token', 
-                                                passwordVariable: 'SONAR_TOKEN', 
-                                                usernameVariable: 'SONAR_USER')]) {
-                                        withSonarQubeEnv('sonarqube-server') { 
-                                                        sh """
-                                                            docker run --rm \
-                                                            --network proyecto-uni-sabana_devops-network \
-                                                            -e SONAR_HOST_URL=http://sonarqube-server:9000 \
-                                                            -v \$(pwd):/usr/src \
-                                                            sonarsource/sonar-scanner-cli \
-                                                            -Dsonar.projectKey=fastapi-app-andres \
-                                                            -Dsonar.sources=. \
-                                                            -Dsonar.login=${SONAR_TOKEN}
-                                                        """
-                                                    }
+                                                 passwordVariable: 'SONAR_TOKEN', 
+                                                 usernameVariable: 'SONAR_USER')]) {
+                    withSonarQubeEnv("${SONAR_SERVER}") { 
+                        sh """
+                            docker run --rm \
+                            --network ${DOCKER_NETWORK} \
+                            -e SONAR_HOST_URL=http://sonarqube-server:9000 \
+                            -v proyecto-uni-sabana_jenkins_home:/var/jenkins_home \
+                            sonarsource/sonar-scanner-cli \
+                            -Dsonar.projectKey=fastapi-app-andres \
+                            -Dsonar.sources=${WORKSPACE} \
+                            -Dsonar.login=${SONAR_TOKEN}
+                        """
+                    }
                 }
             }
         }
@@ -51,9 +51,9 @@ pipeline {
         stage('Push a Docker Hub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', 
-                                 usernameVariable: 'USER', 
-                                 passwordVariable: 'PASS')]) {
-                    sh "echo \$PASS | docker login -u \$USER --password-stdin"
+                                                 usernameVariable: 'USER', 
+                                                 passwordVariable: 'PASS')]) {
+                    sh "echo \$PASS | docker login -u \$USER --password-stdin || docker login -u \$USER -p \$PASS"
                     sh "docker push ${FULL_IMAGE_NAME}"
                 }
             }
@@ -63,7 +63,7 @@ pipeline {
             steps {
                 sh 'docker stop api-final || true'
                 sh 'docker rm api-final || true'
-                sh "docker run -d -p 8030:8000 --name api-final ${FULL_IMAGE_NAME}"
+                sh "docker run -d --network ${DOCKER_NETWORK} -p 8030:8000 --name api-final ${FULL_IMAGE_NAME}"
             }
         }
     }
