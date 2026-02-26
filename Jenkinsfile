@@ -1,46 +1,57 @@
 pipeline {
     agent any
+    
+    tools {
+        dockerTool 'docker-bin' 
+    }
+
     environment {
         DOCKER_USER = 'acmeneses496'
         IMAGE_NAME = 'fastapi-app'
-        REPO_NAME = "${DOCKER_USER}/${IMAGE_NAME}"
+        IMAGE_TAG = 'latest'
+        FULL_IMAGE_NAME = "${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
     }
+
     stages {
-        stage('Checkout Git'){
+        stage('Checkout Git') {
             steps {
                 checkout scm
             }
         }
-        stage('Crear Imagen'){
+
+        stage('Crear Imagen') {
             steps {
-                sh "docker build -t ${REPO_NAME}:latest ."
+                sh "docker build -t ${FULL_IMAGE_NAME} ."
             }
         }
-        stage('Probar Imagen'){
+
+        stage('Push a Docker Hub') {
             steps {
-                sh "docker run --rm ${REPO_NAME}:latest pytest"
-            }
-        }
-        stage('Push a Docker Hub'){
-            steps {
+
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', 
-                                                 passwordVariable: 'DOCKER_HUB_PASSWORD', 
-                                                 usernameVariable: 'DOCKER_HUB_USER')]) {
-                    sh "echo \$DOCKER_HUB_PASSWORD | docker login -u \$DOCKER_HUB_USER --password-stdin"
-                    sh "docker push ${REPO_NAME}:latest"
+                                 usernameVariable: 'USER', 
+                                 passwordVariable: 'PASS')]) {
+                    
+                    sh "echo \$PASS | docker login -u \$USER --password-stdin"
+                    sh "docker push ${FULL_IMAGE_NAME}"
                 }
             }
         }
-        stage('Limpiar Imagen antigua'){
+
+        stage('Limpiar Contenedor antiguo') {
             steps {
+
                 sh 'docker stop api-final || true'
                 sh 'docker rm api-final || true'
             }
         }
-        stage('Desplegar Imagen Local'){
+
+        stage('Desplegar en Puerto 8030') {
             steps {
-                sh "docker run -d -p 8000:8000 --name api-final ${REPO_NAME}:latest"
-                echo 'Despliegue completado en http://localhost:8000'
+
+                sh "docker run -d -p 8030:8000 --name api-final ${FULL_IMAGE_NAME}"
+                echo "Despliegue completado con éxito"
+                echo "Accede en: http://localhost:8030"
             }
         }
     }

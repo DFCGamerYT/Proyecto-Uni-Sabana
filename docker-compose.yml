@@ -1,11 +1,16 @@
 services:
   jenkins:
-    build: .
+    image: jenkins/jenkins:lts
+    container_name: jenkins-server
     privileged: true
     user: root
     ports:
-      - "8075:8075"
+      - "8075:8080" 
       - "50000:50000"
     volumes:
-      - ~/jenkins_home:/var/jenkins_home
+      - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+volumes:
+  jenkins_home:
