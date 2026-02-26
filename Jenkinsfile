@@ -22,10 +22,20 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                script {
-                    def scannerHome = tool 'sonar-scanner'
-                    withSonarQubeEnv('sonarqube-server') {
-                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=fastapi-app-andres"
+                // Cambiamos 'string' por 'usernamePassword'
+                withCredentials([usernamePassword(credentialsId: 'sonarqube-token', 
+                                                passwordVariable: 'SONAR_TOKEN', 
+                                                usernameVariable: 'SONAR_USER')]) {
+                    withSonarQubeEnv('sonarqube-server') { 
+                        sh """
+                            docker run --rm \
+                            -e SONAR_HOST_URL=${SONAR_HOST_URL} \
+                            -e SONAR_LOGIN=${SONAR_TOKEN} \
+                            -v \$(pwd):/usr/src \
+                            sonarsource/sonar-scanner-cli \
+                            -Dsonar.projectKey=fastapi-app-andres \
+                            -Dsonar.sources=.
+                        """
                     }
                 }
             }
@@ -40,12 +50,10 @@ pipeline {
         stage('Push a Docker Hub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', 
-                                                usernameVariable: 'DOCKER_USER_VAR', 
-                                                passwordVariable: 'DOCKER_PASS_VAR')]) {
-                    sh """
-                        echo "${DOCKER_PASS_VAR}" | docker login -u "${DOCKER_USER_VAR}" --password-stdin || docker login -u "${DOCKER_USER_VAR}" -p "${DOCKER_PASS_VAR}"
-                        docker push ${FULL_IMAGE_NAME}
-                    """
+                                 usernameVariable: 'USER', 
+                                 passwordVariable: 'PASS')]) {
+                    sh "echo \$PASS | docker login -u \$USER --password-stdin"
+                    sh "docker push ${FULL_IMAGE_NAME}"
                 }
             }
         }
