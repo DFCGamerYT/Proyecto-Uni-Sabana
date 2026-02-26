@@ -24,12 +24,12 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'sonarqube-token', 
-                                                 passwordVariable: 'SONAR_TOKEN', 
-                                                 usernameVariable: 'SONAR_USER')]) {
-                    withSonarQubeEnv("${SONAR_SERVER}") { 
+                                                passwordVariable: 'SONAR_TOKEN', 
+                                                usernameVariable: 'SONAR_USER')]) {
+                    withSonarQubeEnv('sonarqube-server') { 
                         sh """
                             docker run --rm \
-                            --network ${DOCKER_NETWORK} \
+                            --network proyecto-uni-sabana_devops-network \
                             -e SONAR_HOST_URL=http://sonarqube-server:9000 \
                             -v proyecto-uni-sabana_jenkins_home:/var/jenkins_home \
                             sonarsource/sonar-scanner-cli \
