@@ -22,16 +22,18 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv("${SONAR_SERVER}") {
-                    sh """
-                        docker run --rm \
-                        -e SONAR_HOST_URL=${SONAR_HOST_URL} \
-                        -e SONAR_LOGIN=${SONAR_AUTH_TOKEN} \
-                        -v \$(pwd):/usr/src \
-                        sonarsource/sonar-scanner-cli \
-                        -Dsonar.projectKey=fastapi-app-andres \
-                        -Dsonar.sources=.
-                    """
+                withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
+                    withSonarQubeEnv('sonarqube-server') { 
+                        sh """
+                            docker run --rm \
+                            -e SONAR_HOST_URL=${SONAR_HOST_URL} \
+                            -e SONAR_LOGIN=${SONAR_TOKEN} \
+                            -v \$(pwd):/usr/src \
+                            sonarsource/sonar-scanner-cli \
+                            -Dsonar.projectKey=fastapi-app-andres \
+                            -Dsonar.sources=.
+                        """
+                    }
                 }
             }
         }
