@@ -26,18 +26,18 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'sonarqube-token', 
                                                 passwordVariable: 'SONAR_TOKEN', 
                                                 usernameVariable: 'SONAR_USER')]) {
-                        withSonarQubeEnv('sonarqube-server') { 
-                                        sh '''
-                                            docker run --rm \
-                                            --network proyecto-uni-sabana_devops-network \
-                                            -e SONAR_HOST_URL=http://sonarqube-server:9000 \
-                                            -e SONAR_LOGIN=$SONAR_TOKEN \
-                                            -v $(pwd):/usr/src \
-                                            sonarsource/sonar-scanner-cli \
-                                            -Dsonar.projectKey=fastapi-app-andres \
-                                            -Dsonar.sources=.
-                                        '''
-                                    }
+                                withSonarQubeEnv('sonarqube-server') { 
+                                                sh """
+                                                    docker run --rm \
+                                                    --network proyecto-uni-sabana_devops-network \
+                                                    -e SONAR_HOST_URL=http://sonarqube-server:9000 \
+                                                    -v \$(pwd):/usr/src \
+                                                    sonarsource/sonar-scanner-cli \
+                                                    -Dsonar.projectKey=fastapi-app-andres \
+                                                    -Dsonar.sources=. \
+                                                    -Dsonar.login=${SONAR_TOKEN}
+                                                """
+                                            }
                 }
             }
         }
