@@ -22,22 +22,11 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-
-                withCredentials([usernamePassword(credentialsId: 'sonarqube-token', 
-                                                passwordVariable: 'SONAR_TOKEN', 
-                                                usernameVariable: 'SONAR_USER')]) {
-                                withSonarQubeEnv('sonarqube-server') { 
-                sh """
-                    docker run --rm \
-                    --network proyecto-uni-sabana_devops-network \
-                    -e SONAR_HOST_URL=http://sonarqube-server:9000 \
-                    -v \$(pwd):/usr/src \
-                    sonarsource/sonar-scanner-cli \
-                    -Dsonar.projectKey=fastapi-app-andres \
-                    -Dsonar.sources=/usr/src \
-                    -Dsonar.login=${SONAR_TOKEN}
-                """
-            }
+                script {
+                    def scannerHome = tool 'sonar-scanner'
+                    withSonarQubeEnv('sonarqube-server') {
+                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=fastapi-app-andres"
+                    }
                 }
             }
         }
