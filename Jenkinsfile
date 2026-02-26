@@ -10,6 +10,7 @@ pipeline {
         IMAGE_NAME = 'fastapi-app'
         IMAGE_TAG = 'latest'
         FULL_IMAGE_NAME = "${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
+        SONAR_SERVER = 'sonarqube-server'
     }
 
     stages {
@@ -19,7 +20,23 @@ pipeline {
             }
         }
 
-        stage('Crear Imagen') {
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv("${SONAR_SERVER}") {
+                    sh """
+                        docker run --rm \
+                        -e SONAR_HOST_URL=${SONAR_HOST_URL} \
+                        -e SONAR_LOGIN=${SONAR_AUTH_TOKEN} \
+                        -v \$(pwd):/usr/src \
+                        sonarsource/sonar-scanner-cli \
+                        -Dsonar.projectKey=fastapi-app-andres \
+                        -Dsonar.sources=.
+                    """
+                }
+            }
+        }
+
+        stage('Crear Imagen Docker') {
             steps {
                 sh "docker build -t ${FULL_IMAGE_NAME} ."
             }
@@ -27,31 +44,20 @@ pipeline {
 
         stage('Push a Docker Hub') {
             steps {
-
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', 
                                  usernameVariable: 'USER', 
                                  passwordVariable: 'PASS')]) {
-                    
-                    sh "docker login -u ${USER} -p ${PASS}"
+                    sh "echo \$PASS | docker login -u \$USER --password-stdin"
                     sh "docker push ${FULL_IMAGE_NAME}"
                 }
             }
         }
 
-        stage('Limpiar Contenedor antiguo') {
+        stage('Desplegar') {
             steps {
-
                 sh 'docker stop api-final || true'
                 sh 'docker rm api-final || true'
-            }
-        }
-
-        stage('Desplegar en Puerto 8030') {
-            steps {
-
                 sh "docker run -d -p 8030:8000 --name api-final ${FULL_IMAGE_NAME}"
-                echo "Despliegue completado con éxito"
-                echo "Accede en: http://localhost:8030"
             }
         }
     }
