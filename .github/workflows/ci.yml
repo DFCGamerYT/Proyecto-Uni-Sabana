@@ -1,15 +1,18 @@
 name: Python CI
+# Disparador: ejecutar en cada push
 on: [push]
 jobs:
+    # Job que ejecuta los tests
     test:
+        # Runner de GitHub Actions
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v4  # Clona el repositorio
             - name: Set up Python
-              uses: actions/setup-python@v4
+              uses: actions/setup-python@v4  # Configura Python
               with:
-                python-version: '3.12'
+                python-version: '3.12'  # Versión de Python
             - name: Install dependencies
-              run: pip install -r requirements.txt
+              run: pip install -r requirements.txt  # Instala dependencias
             - name: Run Tests
-              run: pytest
+              run: pytest  # Ejecuta pruebas
