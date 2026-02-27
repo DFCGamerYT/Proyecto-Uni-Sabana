@@ -1,4 +1,4 @@
-# Proyecto Uni Sabana -- Implementación DevOps
+# Actividad 3. Laboratorio técnico U2 (Fundamentos DevOps MAS-MIS 2026-1)
 
 ## 📌 Descripción General
 
@@ -232,8 +232,8 @@ Ejecución
 
 ## 👨‍💻 Proyecto Académico
 
-Integrantes: Andres Meneses, David Cifuentes, David Monsalve
-Universidad de La Sabana
-Maestría en Arquitectura de Software
-Materia: Fundamentos DevOps MAS-MIS 2026-1
-Actividad 3. Laboratorio técnico U2
+#Integrantes: Andres Meneses, David Cifuentes, David Monsalve
+#Universidad de La Sabana
+#Maestría en Arquitectura de Software
+#Materia: Fundamentos DevOps MAS-MIS 2026-1
+#Actividad 3. Laboratorio técnico U2
