@@ -168,7 +168,7 @@ Permite automatizar completamente el ciclo de vida del software.
 
 ### 4. Ejecutar aplicación
 
-    python main.py
+    uvicorn main:app
 
 ------------------------------------------------------------------------
 
