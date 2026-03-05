@@ -69,10 +69,11 @@ pipeline {
         }
         stage('Despliegue K8s') {
             steps {
-                script {
-                    sh 'kubectl apply -f k8s/deployment.yaml'
-                    sh 'kubectl get pods -l app=fastapi'
-                }
+                sh '''
+                # Usamos la ruta completa de snap
+                /snap/bin/kubectl apply -f k8s/deployment.yaml
+                /snap/bin/kubectl get pods
+                '''
             }
         }
     }
