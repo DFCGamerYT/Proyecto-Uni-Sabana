@@ -30,6 +30,9 @@ pipeline {
             steps {
                 echo "--- Verificando qué ve Docker en el Workspace ---"
                 sh 'ls -la ${WORKSPACE}'
+
+                echo "--- Damos permisos de Lectura ---"
+                sh 'chmod -R 777 ${WORKSPACE}'
                 
                 echo "--- Verificando qué verá el contenedor de Sonar ---"
                 sh 'docker run --rm -v "${WORKSPACE}:/data" alpine ls -R /data'
