@@ -26,22 +26,25 @@ pipeline {
                 sh 'ls -lh coverage.xml'
             }
         }
-        stage('Debug de Infraestructura') {
+        stage('Debug de Imagen Personalizada') {
             steps {
                 sh '''
-                echo "--- 1. Creando Volumen de Intercambio ---"
-                docker volume create sonar-debug-vol
+                echo "--- 1. Creando Dockerfile temporal ---"
+                cat <<EOF > Dockerfile.debug
+                FROM alpine
+                COPY . /app
+                EOF
+
+                echo "--- 2. Construyendo imagen de prueba ---"
+                docker build -t sonar-debug-image -f Dockerfile.debug .
+
+                echo "--- 3. VERIFICACIÓN: ¿Qué guardó Docker adentro? ---"
+                # Este comando DEBE mostrar main.py y coverage.xml
+                docker run --rm sonar-debug-image ls -R /app
                 
-                echo "--- 2. Transfiriendo archivos al Volumen ---"
-                # Copiamos del workspace de Jenkins al volumen interno
-                docker run --rm -v sonar-debug-vol:/target -v "$(pwd):/source" alpine cp -r /source/. /target
-                
-                echo "--- 3. VERIFICACIÓN FINAL: ¿Qué hay dentro del volumen? ---"
-                # Si este comando muestra tu main.py y coverage.xml, Sonar funcionará
-                docker run --rm -v sonar-debug-vol:/data alpine ls -R /data
-                
-                echo "--- 4. Limpieza del Debug ---"
-                docker volume rm sonar-debug-vol
+                echo "--- 4. Limpieza de Debug ---"
+                docker rmi sonar-debug-image
+                rm Dockerfile.debug
                 '''
             }
         }
