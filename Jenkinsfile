@@ -23,12 +23,18 @@ pipeline {
         stage('Análisis SonarQube') {
             steps {
                 sh '''
+                echo "--- Verificando contenido dentro del contenedor ---"
+                docker run --rm \
+                    -v "$(pwd):/usr/src" \
+                    alpine ls -R /usr/src
+                
+                echo "--- Ejecutando SonarScanner ---"
                 docker run --rm \
                     --network="host" \
                     -v "$(pwd):/usr/src" \
                     sonarsource/sonar-scanner-cli \
                     -Dsonar.projectKey=Proyecto-FastAPI-Sabana \
-                    -Dsonar.sources=. \
+                    -Dsonar.sources=/usr/src \
                     -Dsonar.projectBaseDir=/usr/src \
                     -Dsonar.host.url=http://localhost:9000 \
                     -Dsonar.login=squ_e150174ee6b2aebb50d51ce4e67b9715d2193cd2 \
