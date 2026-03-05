@@ -26,20 +26,22 @@ pipeline {
                 sh 'ls -lh coverage.xml'
             }
         }
-        stage('Debug de Montaje Temporal') {
+        stage('Debug de Infraestructura') {
             steps {
                 sh '''
-                echo "--- 1. Preparando carpeta temporal ---"
-                mkdir -p /tmp/sonar_test
-                cp -R . /tmp/sonar_test
-                chmod -R 777 /tmp/sonar_test
+                echo "--- 1. Creando Volumen de Intercambio ---"
+                docker volume create sonar-debug-vol
                 
-                echo "--- 2. Verificando visibilidad desde Docker ---"
-                # Ahora el 'túnel' apunta a /tmp, no a la carpeta de Jenkins
-                docker run --rm -v "/tmp/sonar_test:/data" alpine ls -R /data
+                echo "--- 2. Transfiriendo archivos al Volumen ---"
+                # Copiamos del workspace de Jenkins al volumen interno
+                docker run --rm -v sonar-debug-vol:/target -v "$(pwd):/source" alpine cp -r /source/. /target
                 
-                echo "--- 3. Limpieza preventiva ---"
-                rm -rf /tmp/sonar_test
+                echo "--- 3. VERIFICACIÓN FINAL: ¿Qué hay dentro del volumen? ---"
+                # Si este comando muestra tu main.py y coverage.xml, Sonar funcionará
+                docker run --rm -v sonar-debug-vol:/data alpine ls -R /data
+                
+                echo "--- 4. Limpieza del Debug ---"
+                docker volume rm sonar-debug-vol
                 '''
             }
         }
