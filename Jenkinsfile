@@ -26,28 +26,22 @@ pipeline {
                 sh 'ls -lh coverage.xml'
             }
         }
-        stage('Debug de Imagen Personalizada') {
+        stage('Debug: Validación de Empaquetado') {
             steps {
                 sh '''
-                echo "--- 1. Creando Dockerfile temporal ---"
-                cat <<EOF > Dockerfile.debug
-                FROM alpine
-                COPY . /app
-                EOF
-                '''
-                sh '''
-                echo "--- 2. Construyendo imagen de prueba ---"
-                docker build -t sonar-debug-image -f Dockerfile.debug .
-                '''
-                sh '''
-                echo "--- 3. VERIFICACIÓN: ¿Qué guardó Docker adentro? ---"
-                # Este comando DEBE mostrar main.py y coverage.xml
-                docker run --rm sonar-debug-image ls -R /app
-                '''
-                sh '''
-                echo "--- 4. Limpieza de Debug ---"
-                docker rmi sonar-debug-image
-                rm Dockerfile.debug
+                # Creamos un Dockerfile temporal que une la herramienta con TU código
+                echo "FROM sonarsource/sonar-scanner-cli" > Dockerfile.check
+                echo "COPY . /usr/src" >> Dockerfile.check
+                
+                # Construimos la imagen de análisis
+                docker build -t sonar-check -f Dockerfile.check .
+                
+                # VERIFICACIÓN: ¿La herramienta de análisis ya tiene los archivos adentro?
+                docker run --rm sonar-check ls -R /usr/src
+                
+                # Limpieza
+                docker rmi sonar-check
+                rm Dockerfile.check
                 '''
             }
         }
