@@ -26,39 +26,29 @@ pipeline {
                 sh 'ls -lh coverage.xml'
             }
         }
-        stage('Debug: Validación de Empaquetado') {
-            steps {
-                sh '''
-                # Creamos un Dockerfile temporal que une la herramienta con TU código
-                echo "FROM sonarsource/sonar-scanner-cli" > Dockerfile.check
-                echo "COPY . /usr/src" >> Dockerfile.check
-                
-                # Construimos la imagen de análisis
-                docker build -t sonar-check -f Dockerfile.check .
-                
-                # VERIFICACIÓN: ¿La herramienta de análisis ya tiene los archivos adentro?
-                docker run --rm sonar-check ls -R /usr/src
-                
-                # Limpieza
-                docker rmi sonar-check
-                rm Dockerfile.check
-                '''
-            }
-        }
         stage('Análisis SonarQube') {
             steps {
                 sh '''
+                # Creamos la imagen que une el Scanner con tu código
+                echo "FROM sonarsource/sonar-scanner-cli" > Dockerfile.sonar
+                echo "COPY . /usr/src" >> Dockerfile.sonar
+                
+                docker build -t sonar-scanner-final -f Dockerfile.sonar .
+                
+                # Ejecutamos el análisis (sin volúmenes -v, todo está adentro)
                 docker run --rm \
                     --network="host" \
-                    -v "/var/jenkins_home/workspace/Proyecto-FastAPI-CD:/usr/src" \
-                    sonarsource/sonar-scanner-cli \
+                    sonar-scanner-final \
                     -Dsonar.projectKey=Proyecto-FastAPI-Sabana \
                     -Dsonar.sources=/usr/src \
-                    -Dsonar.projectBaseDir=/usr/src \
                     -Dsonar.host.url=http://localhost:9000 \
                     -Dsonar.login=squ_e150174ee6b2aebb50d51ce4e67b9715d2193cd2 \
                     -Dsonar.python.coverage.reportPaths=/usr/src/coverage.xml \
                     -Dsonar.scm.disabled=true
+                    
+                # Limpieza
+                docker rmi sonar-scanner-final
+                rm Dockerfile.sonar
                 '''
             }
         }
