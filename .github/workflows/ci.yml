@@ -14,7 +14,7 @@ jobs:
             - name: Run Tests
               run: pytest
             - name: Run Snyk to check for vulnerabilities
-              uses: snyk/actions/python-3.11@master
+              uses: snyk/actions/python-3.12@master
               env:
                 SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
               with:
