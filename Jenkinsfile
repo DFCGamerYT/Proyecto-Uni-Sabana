@@ -26,6 +26,15 @@ pipeline {
                 sh 'ls -lh coverage.xml'
             }
         }
+        stage('Debug de Montaje') {
+            steps {
+                echo "--- Verificando qué ve Docker en el Workspace ---"
+                sh 'ls -la ${WORKSPACE}'
+                
+                echo "--- Verificando qué verá el contenedor de Sonar ---"
+                sh 'docker run --rm -v "${WORKSPACE}:/data" alpine ls -R /data'
+            }
+        }
         stage('Análisis SonarQube') {
             steps {
                 sh '''
