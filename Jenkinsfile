@@ -20,15 +20,15 @@ pipeline {
                 '''
             }
         }
+        stage('Verificar Reporte') {
+            steps {
+                sh 'pwd'
+                sh 'ls -lh coverage.xml'
+            }
+        }
         stage('Análisis SonarQube') {
             steps {
                 sh '''
-                echo "--- Verificando contenido dentro del contenedor ---"
-                docker run --rm \
-                    -v "$(pwd):/usr/src" \
-                    alpine ls -R /usr/src
-                
-                echo "--- Ejecutando SonarScanner ---"
                 docker run --rm \
                     --network="host" \
                     -v "$(pwd):/usr/src" \
