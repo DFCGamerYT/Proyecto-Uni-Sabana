@@ -71,8 +71,8 @@ pipeline {
             steps {
                 sh '''
                 # Usamos la ruta completa de snap
-                /snap/bin/kubectl apply -f k8s/deployment.yaml
-                /snap/bin/kubectl get pods
+                /usr/bin/kubectl apply -f k8s/deployment.yaml
+                /usr/bin/kubectl get pods
                 '''
             }
         }
