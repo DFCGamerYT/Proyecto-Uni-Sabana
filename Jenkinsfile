@@ -31,7 +31,7 @@ pipeline {
                     -Dsonar.sources=/usr/src \
                     -Dsonar.projectBaseDir=/usr/src \
                     -Dsonar.host.url=http://localhost:9000 \
-                    -Dsonar.token=squ_2ef3e0391f64cf32b3c31917826c5f5d302b3808 \
+                    -Dsonar.token=squ_e150174ee6b2aebb50d51ce4e67b9715d2193cd2 \
                     -Dsonar.python.coverage.reportPaths=/usr/src/coverage.xml \
                     -Dsonar.scm.disabled=true
                 '''
