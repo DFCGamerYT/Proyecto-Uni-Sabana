@@ -30,7 +30,8 @@ pipeline {
                     -Dsonar.projectKey=Proyecto-FastAPI-Sabana \
                     -Dsonar.sources=. \
                     -Dsonar.host.url=http://localhost:9000 \
-                    -Dsonar.login=squ_3549ff877e749663370e5f37693244622cf31901 \
+                    -Dsonar.token=squ_3549ff877e749663370e5f37693244622cf31901 \
+                    -Dsonar.language=py \
                     -Dsonar.python.coverage.reportPaths=coverage.xml
                 '''
             }
