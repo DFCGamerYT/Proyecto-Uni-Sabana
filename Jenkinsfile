@@ -13,7 +13,11 @@ pipeline {
         }
         stage('Pruebas y Cobertura') {
             steps {
-                sh 'docker run --rm -v $(pwd):/app -w /app fastapi-app:latest python -m pytest --cov=. --cov-report=xml:coverage.xml'
+                sh '''
+                docker run --name test-container fastapi-app:latest python -m pytest --cov=. --cov-report=xml:coverage.xml
+                docker cp test-container:/app/coverage.xml .
+                docker rm test-container
+                '''
             }
         }
         stage('Análisis SonarQube') {
