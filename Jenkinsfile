@@ -67,5 +67,13 @@ pipeline {
                 echo 'Despliegue completado en http://localhost:8000'
             }
         }
+        stage('Despliegue K8s') {
+            steps {
+                script {
+                    sh 'kubectl apply -f k8s/deployment.yaml'
+                    sh 'kubectl get pods -l app=fastapi'
+                }
+            }
+        }
     }
 }
