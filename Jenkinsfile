@@ -11,9 +11,24 @@ pipeline {
                 sh 'docker build -t fastapi-app:latest .'
             }
         }
-        stage('Probar Imagen'){
-            steps{
-                sh 'docker run --rm fastapi-app:latest pytest'
+        stage('Pruebas y Cobertura') {
+            steps {
+                sh 'docker run --rm -v $(pwd):/app fastapi-app:latest python -m pytest --cov=. --cov-report=xml:/app/coverage.xml'
+            }
+        }
+        stage('Análisis SonarQube') {
+            steps {
+                sh """
+                docker run --rm \
+                    --network="host" \
+                    -v "\$(pwd):/usr/src" \
+                    sonarsource/sonar-scanner-cli \
+                    -Dsonar.projectKey=Proyecto-FastAPI-Sabana \
+                    -Dsonar.sources=. \
+                    -Dsonar.host.url=http://localhost:9000 \
+                    -Dsonar.login=squ_3549ff877e749663370e5f37693244622cf31901 \
+                    -Dsonar.python.coverage.reportPaths=coverage.xml
+                """
             }
         }
         stage('Limpiar Imagen antigua'){
