@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    environment {
+        SONAR_TOKEN = credentials('SONAR_TOKEN_CRED')
+    }
     stages {
         stage('Checkout Git'){
             steps{
@@ -42,7 +45,7 @@ pipeline {
                     -Dsonar.projectKey=Proyecto-FastAPI-Sabana \
                     -Dsonar.sources=/usr/src \
                     -Dsonar.host.url=http://localhost:9000 \
-                    -Dsonar.login=squ_e150174ee6b2aebb50d51ce4e67b9715d2193cd2 \
+                    -Dsonar.login=${SONAR_TOKEN} \
                     -Dsonar.python.coverage.reportPaths=/usr/src/coverage.xml \
                     -Dsonar.scm.disabled=true
                     
