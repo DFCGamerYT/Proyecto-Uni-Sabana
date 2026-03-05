@@ -29,10 +29,11 @@ pipeline {
                     sonarsource/sonar-scanner-cli \
                     -Dsonar.projectKey=Proyecto-FastAPI-Sabana \
                     -Dsonar.sources=. \
-                    -Dsonar.projectBaseDir=/usr/src \
+                    -Dsonar.branch.name=master \
                     -Dsonar.host.url=http://localhost:9000 \
                     -Dsonar.login=squ_2ef3e0391f64cf32b3c31917826c5f5d302b3808 \
-                    -Dsonar.python.coverage.reportPaths=coverage.xml
+                    -Dsonar.python.coverage.reportPaths=coverage.xml \
+                    -Dsonar.scm.disabled=true
                 '''
             }
         }
