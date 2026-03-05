@@ -34,14 +34,17 @@ pipeline {
                 FROM alpine
                 COPY . /app
                 EOF
-
+                '''
+                sh '''
                 echo "--- 2. Construyendo imagen de prueba ---"
                 docker build -t sonar-debug-image -f Dockerfile.debug .
-
+                '''
+                sh '''
                 echo "--- 3. VERIFICACIÓN: ¿Qué guardó Docker adentro? ---"
                 # Este comando DEBE mostrar main.py y coverage.xml
                 docker run --rm sonar-debug-image ls -R /app
-                
+                '''
+                sh '''
                 echo "--- 4. Limpieza de Debug ---"
                 docker rmi sonar-debug-image
                 rm Dockerfile.debug
