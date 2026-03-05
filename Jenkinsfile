@@ -26,16 +26,21 @@ pipeline {
                 sh 'ls -lh coverage.xml'
             }
         }
-        stage('Debug de Montaje') {
+        stage('Debug de Montaje Temporal') {
             steps {
-                echo "--- Verificando qué ve Docker en el Workspace ---"
-                sh 'ls -la ${WORKSPACE}'
-
-                echo "--- Damos permisos de Lectura ---"
-                sh 'chmod -R 777 ${WORKSPACE}'
+                sh '''
+                echo "--- 1. Preparando carpeta temporal ---"
+                mkdir -p /tmp/sonar_test
+                cp -R . /tmp/sonar_test
+                chmod -R 777 /tmp/sonar_test
                 
-                echo "--- Verificando qué verá el contenedor de Sonar ---"
-                sh 'docker run --rm -v "${WORKSPACE}:/data" alpine ls -R /data'
+                echo "--- 2. Verificando visibilidad desde Docker ---"
+                # Ahora el 'túnel' apunta a /tmp, no a la carpeta de Jenkins
+                docker run --rm -v "/tmp/sonar_test:/data" alpine ls -R /data
+                
+                echo "--- 3. Limpieza preventiva ---"
+                rm -rf /tmp/sonar_test
+                '''
             }
         }
         stage('Análisis SonarQube') {
