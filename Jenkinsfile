@@ -31,7 +31,7 @@ pipeline {
                 sh '''
                 docker run --rm \
                     --network="host" \
-                    -v "$(pwd):/usr/src" \
+                    -v "${WORKSPACE}:/usr/src" \
                     sonarsource/sonar-scanner-cli \
                     -Dsonar.projectKey=Proyecto-FastAPI-Sabana \
                     -Dsonar.sources=/usr/src \
