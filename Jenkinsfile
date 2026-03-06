@@ -5,11 +5,6 @@ pipeline {
         SONAR_TOKEN = credentials('SONAR_TOKEN')
     }
     stages {
-        stage('Checkout Git') {
-            steps {
-                git branch: 'master', url: 'https://github.com/DFCGamerYT/Proyecto-Uni-Sabana.git'
-            }
-        }
         stage('Calidad - SonarQube') {
             steps {
                 script {
@@ -33,6 +28,7 @@ pipeline {
         stage('Seguridad - Snyk Scan') {
             steps {
                 script {
+                    // Usamos una imagen oficial de Snyk para escanear tu imagen local
                     sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
                         -e SNYK_TOKEN=${SNYK_TOKEN} \
                         snyk/snyk:docker snyk container test fastapi-app:latest --severity-threshold=high"
@@ -49,6 +45,24 @@ pipeline {
             steps{
                 sh 'docker run -d -p 8000:8000 --name api-final fastapi-app:latest'
                 echo 'Despliegue completado en http://localhost:8000'
+            }
+        }
+        stage('Configurar Monitoreo (Prometheus & Grafana)') {
+            steps {
+                script {
+                    sh 'docker stop prometheus grafana || true'
+                    sh 'docker rm prometheus grafana || true'
+                    
+                    sh 'docker run -d --name prometheus -p 9090:9090 prom/prometheus'
+                    sh 'docker cp ./prometheus.yml prometheus:/etc/prometheus/prometheus.yml'
+                    sh 'docker restart prometheus'
+                    
+                    sh 'docker run -d --name grafana -p 3000:3000 grafana/grafana-oss'
+                    
+                    echo 'Infraestructura de Monitoreo Completa'
+                    echo 'Prometheus: http://localhost:9090'
+                    echo 'Grafana: http://localhost:3000'
+                }
             }
         }
     }
