@@ -4,10 +4,12 @@ from prometheus_fastapi_instrumentator import Instrumentator
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    Instrumentator().instrument(app).expose(app)
+    Instrumentator().expose(app)
     yield
 
 app = FastAPI(title="Api de la Actividad 3 - DevOps", lifespan=lifespan)
+
+Instrumentator().instrument(app)
 
 @app.get("/")
 def read_root():
