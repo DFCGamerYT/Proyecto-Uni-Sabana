@@ -33,7 +33,9 @@ kind: Service
 metadata:
   name: fastapi-service
 spec:
+  selector:
+    app: fastapi
   ports:
-  - port: 80        
+  - port: 80         
     targetPort: 8000
     protocol: TCP
