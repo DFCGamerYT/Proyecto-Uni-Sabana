@@ -56,8 +56,8 @@ pipeline {
                     sh 'docker run -d --name prometheus -p 9090:9090 prom/prometheus'
                     sh 'docker cp ./prometheus.yml prometheus:/etc/prometheus/prometheus.yml'
                     sh 'docker restart prometheus'
-                    
-                    sh 'docker run -d --name grafana -p 3000:3000 grafana/grafana-oss'
+
+                    sh 'docker run -d --name grafana -p 3000:3000 -v grafana-data:/var/lib/grafana grafana/grafana-oss'
                     
                     echo 'Infraestructura de Monitoreo Completa'
                     echo 'Prometheus: http://localhost:9090'
