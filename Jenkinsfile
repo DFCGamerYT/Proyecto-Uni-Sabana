@@ -8,14 +8,16 @@ pipeline {
         stage('Calidad - SonarQube') {
             steps {
                 script {
+                    sh 'pytest --cov=. --cov-report=xml'
                     sh """
                         docker run --rm \
                         -e SONAR_HOST_URL="http://172.17.0.1:9000" \
                         -e SONAR_TOKEN=${SONAR_TOKEN} \
                         -v \$(pwd):/usr/src \
                         sonarsource/sonar-scanner-cli \
-                        -Dsonar.projectKey=Proyecto-FastAPI \
-                        -Dsonar.sources=.
+                        -Dsonar.projectKey=FastAPI \
+                        -Dsonar.sources=. \
+                        -Dsonar.python.coverage.reportPaths=coverage.xml 
                     """
                 }
             }
