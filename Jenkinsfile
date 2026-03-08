@@ -5,12 +5,6 @@ pipeline {
         SONAR_TOKEN = credentials('SONAR_TOKEN')
     }
     stages {
-        stage('Verificar Contenido del Proyecto') {
-            steps{
-                sh 'COPY . .'
-                sh "docker run --rm -v \$(pwd):/app -w /app fastapi-test:latest ls -R"
-            }
-        }
         stage('Ejecutar Tests y Coverage') {
             steps {
                 script {
