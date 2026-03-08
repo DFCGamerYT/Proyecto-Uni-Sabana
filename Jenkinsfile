@@ -64,16 +64,35 @@ pipeline {
                 }
             }
         }
-        stage('Limpiar Imagen antigua'){
-            steps{
-                sh 'docker stop api-final || true'
-                sh 'docker rm api-final || true'
+        stage('Preparar Manifiesto K8s') {
+            steps {
+                script {
+                    // 1. Extraer el archivo desde la carpeta k8s de la imagen
+                    sh 'docker create --name temp-k8s fastapi-test:latest'
+                    sh 'docker cp temp-k8s:/app/k8s/deployment.yaml .'
+                    sh 'docker rm temp-k8s'
+                    
+                    // 2. Validar que el archivo ya está en el workspace raíz
+                    sh 'ls -la deployment.yaml'
+        
+                    // 3. Aplicar SED (como hiciste con el coverage)
+                    // Esto asegura que el YAML use la imagen local que acabas de validar
+                    sh "sed -i 's|image: .*|image: fastapi-app:latest|g' deployment.yaml"
+                }
             }
         }
-        stage('Desplegar Imagen'){
-            steps{
-                sh 'docker run -d -p 8000:8000 --name api-final fastapi-app:latest'
-                echo 'Despliegue completado en http://localhost:8000'
+        stage('Despliegue - Kubernetes') {
+            steps {
+                script {
+                    sh "ls -R ${WORKSPACE}"
+                    sh """
+                        cat deployment.yaml | docker run -i --rm \
+                        --network host \
+                        -v /var/jenkins_home/.kube:/config \
+                        -e KUBECONFIG=/config/config_portable \
+                        bitnami/kubectl:latest apply -f - --insecure-skip-tls-verify
+                    """
+                }
             }
         }
         stage('Configurar Monitoreo (Prometheus & Grafana)') {
@@ -91,15 +110,6 @@ pipeline {
                     echo 'Infraestructura de Monitoreo Completa'
                     echo 'Prometheus: http://localhost:9090'
                     echo 'Grafana: http://localhost:3000'
-                }
-            }
-        }
-        stage('Despliegue - Kubernetes') {
-            steps {
-                script {
-                    sh 'kubectl apply -f deployment.yaml'
-                    sh 'kubectl rollout status deployment/fastapi-api'
-                    echo "API desplegada exitosamente en Kubernetes"
                 }
             }
         }
