@@ -14,6 +14,7 @@ pipeline {
                     sh 'docker rm test-container'
                     sh "sed -i 's|/app|/usr/src|g' coverage.xml"
                     sh "grep '/usr/src' coverage.xml"
+                    sh "ls -R . "
                 }
             }
         }
