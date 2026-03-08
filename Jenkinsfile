@@ -26,7 +26,9 @@ pipeline {
                         sonarsource/sonar-scanner-cli \
                         -Dsonar.projectKey=FastAPI \
                         -Dsonar.sources=. \
-                        -Dsonar.python.coverage.reportPaths=coverage.xml 
+                        -Dsonar.python.coverage.reportPaths=coverage.xml \
+                        -Dsonar.projectBaseDir=/usr/src \
+                        -Dsonar.scm.disabled=true
                     """
                 }
             }
