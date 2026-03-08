@@ -13,6 +13,7 @@ pipeline {
                     sh 'docker cp test-container:/app/coverage.xml .'
                     sh 'docker rm test-container'
                     sh "sed -i 's|/app|/usr/src|g' coverage.xml"
+                    sh "grep '/usr/src' coverage.xml"
                 }
             }
         }
