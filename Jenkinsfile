@@ -21,13 +21,16 @@ pipeline {
         stage('Calidad - SonarQube') {
             steps {
                 script {
-                    // 1. Creamos un contenedor temporal 'dummy' que solo sirve para recibir los archivos
-                    sh "docker create --v /usr/src --name sonar_data alpine"
+                    // 1. Limpieza preventiva
+                    sh "docker rm -f sonar_data || true"
                     
-                    // 2. Copiamos TODO el contenido actual (incluyendo .py y coverage.xml) al volumen
+                    // 2. Crear el contenedor de datos (Nota: es -v con un solo guion)
+                    sh "docker create -v /usr/src --name sonar_data alpine"
+                    
+                    // 3. Copiar código y coverage al volumen
                     sh "docker cp . sonar_data:/usr/src"
                     
-                    // 3. Ejecutamos el scanner usando los volumenes de ese contenedor 'dummy'
+                    // 4. Ejecutar el scanner usando los volúmenes de 'sonar_data'
                     sh """
                         docker run --rm \
                         --volumes-from sonar_data \
@@ -41,8 +44,8 @@ pipeline {
                         -Dsonar.scm.disabled=true
                     """
                     
-                    // 4. Limpiamos
-                    sh "docker rm -v sonar_data"
+                    // 5. Limpiar el contenedor temporal
+                    sh "docker rm -f sonar_data"
                 }
             }
         }
