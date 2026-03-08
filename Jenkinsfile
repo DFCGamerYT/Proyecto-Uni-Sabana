@@ -21,6 +21,8 @@ pipeline {
         stage('Calidad - SonarQube') {
             steps {
                 script {
+                    checkout scm
+                    
                     sh """
                         docker run --rm \
                         -e SONAR_HOST_URL="http://172.17.0.1:9000" \
