@@ -12,6 +12,7 @@ pipeline {
                     sh 'docker run --name test-container fastapi-test:latest pytest --cov=. --cov-report=xml:coverage.xml'
                     sh 'docker cp test-container:/app/coverage.xml .'
                     sh 'docker rm test-container'
+                    sh "sed -i 's|/app|/usr/src|g' coverage.xml"
                 }
             }
         }
