@@ -5,10 +5,23 @@ pipeline {
         SONAR_TOKEN = credentials('SONAR_TOKEN')
     }
     stages {
+        stage('Ejecutar Tests y Coverage') {
+            steps {
+                script {
+                    sh 'docker build -t fastapi-test:latest .'
+                    sh """
+                        docker run --rm \
+                        -v \$(pwd):/app \
+                        -w /app \
+                        fastapi-test:latest \
+                        pytest --cov=. --cov-report=xml:coverage.xml
+                    """
+                }
+            }
+        }
         stage('Calidad - SonarQube') {
             steps {
                 script {
-                    sh 'pytest --cov=. --cov-report=xml'
                     sh """
                         docker run --rm \
                         -e SONAR_HOST_URL="http://172.17.0.1:9000" \
