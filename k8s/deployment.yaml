@@ -1,11 +1,12 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: fastapi-deployment
+  name: fastapi-api
   labels:
     app: fastapi
+    project: proyecto-uni-sabana
 spec:
-  replicas: 2
+  replicas: 2 
   selector:
     matchLabels:
       app: fastapi
@@ -16,26 +17,34 @@ spec:
     spec:
       containers:
       - name: fastapi-container
-        image: fastapi-app:latest
-        imagePullPolicy: Never 
+        image: fastapi-app:latest 
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8000
-        resources: 
+        resources:
           limits:
-            cpu: "500m"
-            memory: "512Mi"
-          requests:
-            cpu: "200m"
             memory: "256Mi"
+            cpu: "500m"
+          requests:
+            memory: "128Mi"
+            cpu: "256m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: fastapi-service
 spec:
+  type: NodePort # Permite acceso externo desde tu Ubuntu
   selector:
     app: fastapi
   ports:
-  - port: 80         
-    targetPort: 8000
-    protocol: TCP
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+      nodePort: 30007 # Puerto fijo para tus pruebas en localhost:30007

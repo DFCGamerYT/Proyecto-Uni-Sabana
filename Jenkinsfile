@@ -94,5 +94,14 @@ pipeline {
                 }
             }
         }
+        stage('Despliegue - Kubernetes') {
+            steps {
+                script {
+                    sh 'kubectl apply -f deployment.yaml'
+                    sh 'kubectl rollout status deployment/fastapi-api'
+                    echo "API desplegada exitosamente en Kubernetes"
+                }
+            }
+        }
     }
 }
