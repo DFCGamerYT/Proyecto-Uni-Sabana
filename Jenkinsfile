@@ -7,6 +7,7 @@ pipeline {
     stages {
         stage('Verificar Contenido del Proyecto') {
             steps{
+                sh 'COPY . .'
                 sh "docker run --rm -v \$(pwd):/app -w /app fastapi-test:latest ls -R"
             }
         }
@@ -14,14 +15,9 @@ pipeline {
             steps {
                 script {
                     sh 'docker build -t fastapi-test:latest .'
-                    
-                    sh """
-                        docker run --rm \
-                        -v \$(pwd):/app \
-                        -w /app \
-                        fastapi-test:latest \
-                        pytest . --cov=. --cov-report=xml:coverage.xml
-                    """
+                    sh 'docker run --name test-container fastapi-test:latest pytest --cov=. --cov-report=xml:coverage.xml'
+                    sh 'docker cp test-container:/app/coverage.xml .'
+                    sh 'docker rm test-container'
                 }
             }
         }
